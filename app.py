@@ -2,7 +2,7 @@ from flask import Flask,redirect, render_template, request,session
 from flask_session import Session
 import sqlite3
 import re
-# change 2
+# change 1
 def connect():
     x=sqlite3.connect("table.db",isolation_level=None)
     x.row_factory=sqlite3.Row
