@@ -1,7 +1,8 @@
 from flask import Flask,redirect, render_template, request,session
-from flask_session import Session
+import math
 import sqlite3
 import re
+
 
 def connect():
     x=sqlite3.connect("table.db",isolation_level=None)
@@ -57,7 +58,7 @@ def index():
                            if i["ps"]==ps:
                                session["error"]="State already exists"
                                return redirect("/")
-                   
+
 
                        if(rows):
                             if len(output)!=len(rows[0]["output"]):
@@ -155,54 +156,28 @@ def index():
             state2=str()
             for i in range(0,len(implication_table)):
 
-                for j in range(0,count):
-                    if j==count-1 or implication_table[i]=="X" or implication_table[i]=="✔" or implication_table[i].startswith(".X"):
-                        break
-                    for k in range(0,j+1):
-                        try:
+                for j in range(0,len(implication_table)):
+                        if implication_table[j]=="X" or implication_table[j]=="✔" or implication_table[j].startswith(".X"):
+                            continue
+                        if len(implication_table[j])==7:
+                            set1={implication_table[j].split("/")[0].split("-")[0],implication_table[j].split("/")[0].split("-")[1]}
+                            set2={implication_table[j].split("/")[1].split("-")[0],implication_table[j].split("/")[1].split("-")[1]}
+                        elif len(implication_table[j])==3:
+                            set1={implication_table[j].split("-")[0],implication_table[j].split("-")[1]}
+                        for k in range(0,len(implication_table)):
+                                l=  int(  (-1+math.sqrt(1-(4*(-2*k))))/2  )
+                                m=int( k-( int(l*(l+1)/2) ) )
 
-                            if j!=count-1:
-                                state1=rows[k]["ps"]
-                                state2=rows[j+1]["ps"]
+                                state1=rows[m]["ps"]
+                                state2=rows[l+1]["ps"]
                                 set3={state1,state2}
-                                if len(implication_table[i])==7:
+                                if len(implication_table[j])==7:
+                                    if (set1==set3 or set2==set3) and (implication_table[k]=="X" or implication_table[k].startswith(".X")):
+                                        implication_table[j]=".X"+str(implication_table[j])
+                                elif len(implication_table[j])==3:
+                                    if (set1==set3) and (implication_table[k]=="X" or implication_table[k].startswith(".X")):
+                                        implication_table[j]=".X"+str(implication_table[j])
 
-                                    set1={implication_table[i].split("/")[0].split("-")[0],implication_table[i].split("/")[0].split("-")[1]}
-                                    set2={implication_table[i].split("/")[1].split("-")[0],implication_table[i].split("/")[1].split("-")[1]}
-                                    print(implication_table[i],set3,implication_table[int(j*(j+1)/2)+k])
-                                    if (set1==set3 or set2==set3) and (implication_table[int(j*(j+1)/2)+k]=="X" or implication_table[int(j*(j+1)/2)+k].startswith(".X")):
-                                        implication_table[i]=".X"+str(implication_table[i])
-                                elif len(implication_table[i])==3:
-                                    set1={implication_table[i].split("-")[0],implication_table[i].split("-")[1]}
-                                    if (set1==set3) and (implication_table[int(j*(j+1)/2)+k]=="X" or implication_table[int(j*(j+1)/2)+k].startswith(".X")):
-                                        implication_table[i]=".X"+str(implication_table[i])
-                        except IndexError:
-                            break
-            for i in range(0,len(implication_table)):
-
-                for j in range(0,count):
-                    if j==count-1 or implication_table[i]=="X" or implication_table[i]=="✔" or implication_table[i].startswith(".X"):
-                        break
-                    for k in range(0,j+1):
-                        try:
-
-                            if j!=count-1:
-                                state1=rows[k]["ps"]
-                                state2=rows[j+1]["ps"]
-                                set3={state1,state2}
-                                if len(implication_table[i])==7:
-
-                                    set1={implication_table[i].split("/")[0].split("-")[0],implication_table[i].split("/")[0].split("-")[1]}
-                                    set2={implication_table[i].split("/")[1].split("-")[0],implication_table[i].split("/")[1].split("-")[1]}
-                                    print(implication_table[i],set3,implication_table[int(j*(j+1)/2)+k])
-                                    if (set1==set3 or set2==set3) and (implication_table[int(j*(j+1)/2)+k]=="X" or implication_table[int(j*(j+1)/2)+k].startswith(".X")):
-                                        implication_table[i]=".X"+str(implication_table[i])
-                                elif len(implication_table[i])==3:
-                                    set1={implication_table[i].split("-")[0],implication_table[i].split("-")[1]}
-                                    if (set1==set3) and (implication_table[int(j*(j+1)/2)+k]=="X" or implication_table[int(j*(j+1)/2)+k].startswith(".X")):
-                                        implication_table[i]=".X"+str(implication_table[i])
-                        except IndexError:
-                            break
 
 
 
@@ -300,5 +275,3 @@ def index():
                         results[t]["ns1"]=j["ps"]
                 t+=1
             return render_template("index.html",graph=rows,count=count,output_length=output_length,implication_table=implication_table,sets=sets,results=results,error=error)
-
-
